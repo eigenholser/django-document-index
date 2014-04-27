@@ -1,4 +1,5 @@
 -r install.txt
+factory_boy
 django-nose
 coverage
 django-coverage
