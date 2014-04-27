@@ -40,5 +40,5 @@ setup(
     include_package_data=True,
     install_requires=requires('requirements/install.txt'),
     tests_require=requires('requirements/test.txt'),
-#   test_suite='document_index.tests.runtests.runtests',
+    test_suite='document_index.tests.runtests.runtests',
 )
