@@ -1,0 +1,5 @@
+-r install.txt
+django-nose
+coverage
+django-coverage
+mock
