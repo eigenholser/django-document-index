@@ -23,8 +23,7 @@ class PermissionsTests(TestCase):
 
     def test_has_object_permission_safe_method(self):
         """
-        Test permission class IsOwnerOrReadOnly. Test has_object_permission()
-        method with safe method GET.
+        Test permission class method with safe method GET.
         """
         request = self.factory.get('/')
         request.user = self.user
@@ -35,8 +34,7 @@ class PermissionsTests(TestCase):
 
     def test_has_object_permission_unsafe_method(self):
         """
-        Test permission class IsOwnerOrReadOnly. Test has_object_permission()
-        method with safe method GET.
+        Test permission class method with unsafe method POST.
         """
         request = self.factory.post('/')
         request.user = self.user

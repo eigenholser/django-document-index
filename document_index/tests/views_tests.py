@@ -10,7 +10,9 @@ from factories import GroupTreeListFactory, GroupFactory
 
 
 class GroupListViewTest(TestCase):
-
+    """
+    TODO: This class may be superceded.
+    """
     def setUp(self):
         self.factory = RequestFactory()
         self.user = User.objects.create_user(
@@ -69,7 +71,7 @@ class GroupListCreateViewWithTreeTest(TestCase):
             comment='test group comment')
 
     def test_create_group_post_root(self):
-        """Create a new group via POST."""
+        """Create a new root group via POST."""
         post_data = {'parent': 0, 'name': 'Group Node Name Root',
                      'description': 'Group Node Description Root',
                      'comment': 'Group Node Comment Root'}
@@ -79,7 +81,7 @@ class GroupListCreateViewWithTreeTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_group_post_child(self):
-        """Create a new group via POST."""
+        """Create a new child group via POST."""
         post_data = {'parent': 1, 'name': 'Group Node Name Child',
                      'description': 'Group Node Description Child',
                      'comment': 'Group Node Comment Child'}
