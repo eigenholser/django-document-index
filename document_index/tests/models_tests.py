@@ -14,7 +14,6 @@ class GroupTreeListTestCase(TestCase):
         group_tree_list.save()
 
     def test_group_tree_list_create(self):
-        import ipdb; ipdb.set_trace()
         group_tree_list = GroupTreeList.objects.get(id=1)
         self.assertEqual(group_tree_list.name, 'Tree 0')
         self.assertEqual(group_tree_list.__unicode__(), 'Tree 0')

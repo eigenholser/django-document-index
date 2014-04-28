@@ -52,6 +52,11 @@ class GroupList(generics.ListCreateAPIView):
 
 
 class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Handle Retrieve, Update, Destroy operations with HTTP verbs GET, PUT, and
+    DELETE.
+    """
+
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
@@ -59,6 +64,35 @@ class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def pre_save(self, obj):
         obj.owner = self.request.user
+
+    def put(self, request):
+        """
+        Update group instance. PUT replaces the entire object. Logic to reside
+        in model object.
+        """
+        pass
+
+    def patch(self, request):
+        """
+        Partial update group instance.
+        """
+
+    def delete(self, request):
+        """
+        Delete group node. Logic to reside in model object. Do not allow
+        delete if group has documents attached.
+        """
+        pass
+
+
+class GroupMove(generics.UpdateAPIView):
+    """
+    Provide functionality for moving group node to be child of another group
+    node. Logic to reside in model. HTTP verb will be PUT since this will be
+    construed as an update of the entire group instance. Some fuzziness here.
+    See https://tabo.pe/projects/django-treebeard/docs/1.61/api.html#treebeard.models.Node.move
+    """
+    pass
 
 
 class DocumentList(generics.ListCreateAPIView):

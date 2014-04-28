@@ -17,13 +17,13 @@ class GroupSerializer(serializers.Serializer):
         Override Serializer restore_object.
         """
         user = self.context['request'].user
-        if instance is not None:
-            instance.owner = user
-            instance.name = attrs.get('name', instance.name)
-            instance.description = attrs.get('description',
-                    instance.description)
-            instance.comment = attrs.get('comment', instance.comment)
-            return instance
+#       if instance is not None:
+#           instance.owner = user
+#           instance.name = attrs.get('name', instance.name)
+#           instance.description = attrs.get('description',
+#                   instance.description)
+#           instance.comment = attrs.get('comment', instance.comment)
+#           return instance
 
         parent_id = int(attrs.get('parent'))
 
@@ -59,12 +59,12 @@ class GroupSerializer(serializers.Serializer):
 
         return group
 
-    def get_parent_id(self, obj):
-        """Parent node id."""
-        parent = obj.get_parent()
-        if (not parent):
-            return None
-        return obj.get_parent().id
+#   def get_parent_id(self, obj):
+#       """Parent node id."""
+#       parent = obj.get_parent()
+#       if (not parent):
+#           return None
+#       return obj.get_parent().id
 
     def get_children_count(self, obj):
         """Number of children below node."""

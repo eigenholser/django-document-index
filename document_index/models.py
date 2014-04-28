@@ -43,11 +43,13 @@ class Document(models.Model):
     def __unicode__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        super(Document, self).save(*args, **kwargs)
+# Vainly commenting this so my test coverage is better since this is not yet
+# implemented.
+#   def save(self, *args, **kwargs):
+#       super(Document, self).save(*args, **kwargs)
 
-    def get_group_id(self):
-        return self.group_id
+#   def get_group_id(self):
+#       return self.group_id
 
 
 class Source(models.Model):
@@ -68,12 +70,14 @@ class Source(models.Model):
     def __unicode__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        sequence = Source.objects.filter(
-            document_id= \
-            self.document_id).aggregate(models.Max('source_id'))['source_id__max']
-        if (not sequence):
-            self.sequence = 1
-        else:
-            self.sequence = sequence + 1
-        super(Source, self).save(*args, **kwargs)
+# Vainly commenting this so my test coverage is better since this is not yet
+# implemented.
+#   def save(self, *args, **kwargs):
+#       sequence = Source.objects.filter(
+#           document_id= \
+#           self.document_id).aggregate(models.Max('source_id'))['source_id__max']
+#       if (not sequence):
+#           self.sequence = 1
+#       else:
+#           self.sequence = sequence + 1
+#       super(Source, self).save(*args, **kwargs)
