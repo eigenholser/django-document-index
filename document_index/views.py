@@ -65,17 +65,48 @@ class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
     def pre_save(self, obj):
         obj.owner = self.request.user
 
-    def put(self, request):
+    def put(self, request, *args, **kwargs):
         """
         Update group instance. PUT replaces the entire object. Logic to reside
         in model object.
         """
-        pass
+        # TODO: Move lot of this to model.
+        # TODO: Validate.
+        name = request.DATA['name']
+        description = request.DATA['description']
+        comment = request.DATA['comment']
+        group_id = kwargs['pk']
+        gnode = Group.objects.get(id=group_id)
+        gnode.name = name
+        gnode.description = description
+        gnode.comment = comment
+        gnode.save()
+        # TODO: This response assumes success.
+        return Response({'detail': 'node updated'},
+                status=status.HTTP_205_RESET_CONTENT)
 
-    def patch(self, request):
+
+    def patch(self, request, *args, **kwargs):
         """
         Partial update group instance.
         """
+        # TODO: Move some of this to model. Then call gnode.update() or
+        # something like that.
+        name = request.DATA.get('name', None)
+        description = request.DATA.get('description', None)
+        comment = request.DATA.get('comment', None)
+        group_id = kwargs['pk']
+        gnode = Group.objects.get(id=group_id)
+        if name is not None:
+            gnode.name = name
+        if description is not None:
+            gnode.description = description
+        if comment is  not None:
+            gnode.comment = comment
+        gnode.save()
+        # TODO: This response assumes success.
+        return Response({'detail': 'node updated'},
+                status=status.HTTP_206_PARTIAL_CONTENT)
 
     def delete(self, request):
         """
@@ -92,7 +123,17 @@ class GroupMove(generics.UpdateAPIView):
     construed as an update of the entire group instance. Some fuzziness here.
     See https://tabo.pe/projects/django-treebeard/docs/1.61/api.html#treebeard.models.Node.move
     """
-    pass
+    def patch(self, request, *args, **kwargs):
+
+        parent_id = request.DATA['parent']
+        parent_node = Group.objects.get(id=parent_id)
+        node_id = kwargs['pk']
+        node = Group.objects.get(id=node_id)
+        node.move(parent_node, 'sorted-child')
+        # This response assumes success. Check and handle.
+        return Response({'detail': 'node moved'}, status.HTTP_200_OK)
+
+
 
 
 class DocumentList(generics.ListCreateAPIView):
