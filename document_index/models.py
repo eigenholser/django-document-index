@@ -29,6 +29,13 @@ class Group(MP_Node):
     def __unicode__(self):
         return self.name
 
+    def annotated_list(self):
+        """
+        Return treebeard annotated list relative to this node.
+        """
+        # get_annotated_list is a class method. List includes current node.
+        return Group.get_annotated_list(self)
+
 
 class Document(models.Model):
     document_id = models.AutoField(primary_key=True)

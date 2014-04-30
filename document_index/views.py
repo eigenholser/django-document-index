@@ -1,8 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import generics
-from rest_framework import permissions
-from rest_framework import status
+from rest_framework import generics, permissions, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from document_index.models import GroupTreeList, Group, Document, Source
 from document_index.serializers import (GroupSerializer, DocumentSerializer,
@@ -19,14 +18,24 @@ class GroupList(generics.ListCreateAPIView):
 
     def get_queryset(self, *args, **kwargs):
         # TODO: request.user available only if logged in user.
+        import ipdb; ipdb.set_trace()
         try:
-            tree_id = GroupTreeList.objects.get(name=self.request.user.username).id
-            queryset = Group.get_root_nodes().filter(tree_id=tree_id)
+            if self.parent == 0:
+                tree_id = GroupTreeList.objects.get(
+                        name=self.request.user.username).id
+                queryset = Group.get_root_nodes().filter(tree_id=tree_id)
+            else:
+                parent_node = Group.objects.get(id=self.parent)
+                queryset = parent_node.get_children()
         except ObjectDoesNotExist:
-            # This gets all root nodes for all users.
-            queryset = Group.get_root_nodes()
+            queryset = Group.objects.none()
 
         return queryset
+
+    def get(self, request, *args, **kwargs):
+        # Need parent_id for get_queryset()
+        self.parent = int(kwargs['pk'])
+        return super(GroupList, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """Create new group node.
@@ -49,6 +58,42 @@ class GroupList(generics.ListCreateAPIView):
                     headers=headers)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GroupAnnotatedList(APIView):
+    """
+    Implements API endpoint for retrieving an annotated list from any node in
+    the group tree including the node itself.
+    """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request, *args, **kwargs):
+        # Need parent_id for get_queryset()
+        self.parent = int(kwargs['pk'])
+        queryset = None
+
+        try:
+            if self.parent == 0:
+                tree_id = GroupTreeList.objects.get(
+                        name=self.request.user.username).id
+                queryset = Group.get_root_nodes().filter(tree_id=tree_id)
+            else:
+                parent_node = Group.objects.get(id=self.parent)
+                queryset = parent_node.get_children()
+        except ObjectDoesNotExist:
+            queryset = Group.objects.none()
+
+
+        master_annotated_list = []
+
+        for parent_node in queryset:
+            for child_node, info in parent_node.annotated_list():
+                serializer = GroupSerializer(child_node,
+                        context={'request': request})
+                combined_data = dict(serializer.data.items() + info.items())
+                master_annotated_list.append(combined_data)
+
+        return Response(master_annotated_list, status=status.HTTP_200_OK)
 
 
 class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
