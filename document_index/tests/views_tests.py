@@ -16,7 +16,6 @@ class GetGroupPostData(object):
     Supporting class. Reduce duplication.
     """
     group_post_data = {
-            'parent': 0,
             'name': 'Group Node Name Root',
             'description': 'Group Node Description Root',
             'comment': 'Group Node Comment Root',
@@ -38,18 +37,16 @@ class GroupListViewTest(TestCase):
 
     def test_group_list_with_tree(self):
         GroupTreeListFactory(name='test').save()
-        request = self.factory.get('/groups/')
-        request.user = self.user
-        group_list_view = GroupList.as_view()
-        response = group_list_view(request)
-        self.assertEqual(response.status_code, 200)
+        client = Client()
+        client.login(username='test', password='secret')
+        response = client.get('/groups/parent/0/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_group_list_without_tree(self):
-        request = self.factory.get('/groups/')
-        request.user = self.user
-        group_list_view = GroupList.as_view()
-        response = group_list_view(request)
-        self.assertEqual(response.status_code, 200)
+        client = Client()
+        client.login(username='test', password='secret')
+        response = client.get('/groups/parent/0/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class GroupListCreateViewWithoutTreeTest(TestCase):
@@ -66,7 +63,7 @@ class GroupListCreateViewWithoutTreeTest(TestCase):
         data = GetGroupPostData.get_group_post_data()
         client = Client()
         client.login(username='test', password='secret')
-        response = client.post('/groups/', data)
+        response = client.post('/groups/parent/0/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
@@ -91,16 +88,15 @@ class GroupListCreateViewWithTreeTest(TestCase):
         data = GetGroupPostData.get_group_post_data()
         client = Client()
         client.login(username='test', password='secret')
-        response = client.post('/groups/', data)
+        response = client.post('/groups/parent/0/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_group_post_child(self):
         """Create a new child group via POST."""
         data = GetGroupPostData.get_group_post_data()
-        data['parent'] = 1
         client = Client()
         client.login(username='test', password='secret')
-        response = client.post('/groups/', data)
+        response = client.post('/groups/parent/1/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_list_group_get(self):
@@ -108,8 +104,8 @@ class GroupListCreateViewWithTreeTest(TestCase):
         GET a list of groups consisting of only 1 which was created in setUp().
         """
         client = Client()
-        client.login(username='tesst', password='secret')
-        response = client.get('/groups/')
+        client.login(username='test', password='secret')
+        response = client.get('/groups/parent/0/')
         self.assertEqual(response.data[0]['name'], 'test group name')
         self.assertEqual(response.data[0]['description'],
                 'test group description')

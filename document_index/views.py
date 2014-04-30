@@ -18,7 +18,6 @@ class GroupList(generics.ListCreateAPIView):
 
     def get_queryset(self, *args, **kwargs):
         # TODO: request.user available only if logged in user.
-        import ipdb; ipdb.set_trace()
         try:
             if self.parent == 0:
                 tree_id = GroupTreeList.objects.get(
@@ -42,12 +41,14 @@ class GroupList(generics.ListCreateAPIView):
         Need parent_id
         """
         # needs error handling
+        self.parent = int(kwargs['pk'])
         return super(GroupList, self).post(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         """Override create method on CreateModelMixin to prevent double save.
         treebeard calls save() on node add. Maybe there is a way around that.
         """
+        request.DATA['parent'] = kwargs['pk']
         serializer = self.get_serializer(data=request.DATA, files=request.FILES)
 
         if serializer.is_valid():
