@@ -36,6 +36,14 @@ class Group(MP_Node):
         # get_annotated_list is a class method. List includes current node.
         return Group.get_annotated_list(self)
 
+    def update_group_instance(self, data):
+        for key in ['name', 'description', 'comment']:
+            value = getattr(self, key, None)
+            if value != data.get(key, value):
+                setattr(self, key, data[key])
+        self.save()
+        return True # TODO: catch errors
+
 
 class Document(models.Model):
     document_id = models.AutoField(primary_key=True)

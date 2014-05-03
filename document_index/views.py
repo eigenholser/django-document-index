@@ -14,6 +14,7 @@ class GroupList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def pre_save(self, obj):
+        # TODO: conditionally if not already present.
         obj.owner = self.request.user
 
     def get_queryset(self, *args, **kwargs):
@@ -109,57 +110,43 @@ class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
             IsOwnerOrReadOnly,)
 
     def pre_save(self, obj):
+        # TODO: conditionally if not already present.
         obj.owner = self.request.user
 
-    def put(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         """
         Update group instance. PUT replaces the entire object. Logic to reside
         in model object.
         """
-        # TODO: Move lot of this to model.
-        # TODO: Validate.
-        name = request.DATA['name']
-        description = request.DATA['description']
-        comment = request.DATA['comment']
         group_id = kwargs['pk']
         gnode = Group.objects.get(id=group_id)
-        gnode.name = name
-        gnode.description = description
-        gnode.comment = comment
-        gnode.save()
+        gnode.update_group_instance(request.DATA)
         # TODO: This response assumes success.
-        return Response({'detail': 'node updated'},
-                status=status.HTTP_205_RESET_CONTENT)
+        serializer = self.serializer_class(gnode)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    def patch(self, request, *args, **kwargs):
-        """
-        Partial update group instance.
-        """
-        # TODO: Move some of this to model. Then call gnode.update() or
-        # something like that.
-        name = request.DATA.get('name', None)
-        description = request.DATA.get('description', None)
-        comment = request.DATA.get('comment', None)
-        group_id = kwargs['pk']
-        gnode = Group.objects.get(id=group_id)
-        if name is not None:
-            gnode.name = name
-        if description is not None:
-            gnode.description = description
-        if comment is  not None:
-            gnode.comment = comment
-        gnode.save()
-        # TODO: This response assumes success.
-        return Response({'detail': 'node updated'},
-                status=status.HTTP_206_PARTIAL_CONTENT)
+#   def partial_update(self, request, *args, **kwargs):
+#       """
+#       Partial update group instance. Is this even useful? It
+#       """
+#       group_id = kwargs['pk']
+#       gnode = Group.objects.get(id=group_id)
+#       gnode.update_group_instance(request.DATA)
+#       # TODO: This response assumes success.
+#       return Response({'detail': 'node updated'},
+#               status=status.HTTP_206_PARTIAL_CONTENT)
 
-    def delete(self, request):
+    def delete(self, request, *args, **kwargs):
         """
         Delete group node. Logic to reside in model object. Do not allow
         delete if group has documents attached.
         """
-        pass
+        # TODO: Check for child nodes. Refuse to delete if child nodes exist.
+        # Look into Treebeard exceptions if this is attempted.
+        group_id = kwargs['pk']
+        return Response({'detail': '{0} deleted'.format(group_id)},
+            status=status.HTTP_204_NO_CONTENT)
 
 
 class GroupMove(generics.UpdateAPIView):
